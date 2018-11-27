@@ -1,24 +1,25 @@
 from flask import render_template, url_for, flash, request, redirect
 from blog.models import User, Post
-from blog.forms import RegistrationForm, LoginForm
+from blog.forms import RegistrationForm, LoginForm, UpdateAccountForm
 from blog import app, db, bcrypt
 from flask_login import login_user, logout_user, current_user, login_required
 
 
 posts = [
     {
-        'author' : 'Nasir Jones',
-        'title' : 'Illmatic',
-        'content' : 'First post content',
-        'date_posted' : 'April 20, 2018 '
+        'author': 'Nasir Jones',
+        'title': 'Illmatic',
+        'content': 'First post content',
+        'date_posted': 'April 20, 2018 '
     },
     {
-        'author' : 'Amaru Pac',
-        'title' : 'I get around',
-        'content' : 'Second post content',
-        'date_posted' : 'February 21, 2017 '
+        'author': 'Amaru Pac',
+        'title': 'I get around',
+        'content': 'Second post content',
+        'date_posted': 'February 21, 2017 '
     }
 ]
+
 
 @app.route("/")
 @app.route("/home")
@@ -37,8 +38,10 @@ def register():
         return redirect(url_for('home'))
     form = RegistrationForm()
     if form.validate_on_submit():
-        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        user = User(username=form.username.data, email=form.email.data, password=hashed_password)
+        hashed_password = bcrypt.generate_password_hash(
+            form.password.data).decode('utf-8')
+        user = User(username=form.username.data,
+                    email=form.email.data, password=hashed_password)
         db.session.add(user)
         db.session.commit()
         flash('Account has been created! You can log in', 'success')
@@ -62,14 +65,17 @@ def login():
     return render_template('login.html', title='Login', form=form)
 
 
-
 @app.route("/logout")
 def logout():
     logout_user()
     return redirect(url_for('home'))
 
+
 @app.route("/account")
 @login_required
 def account():
-    image_file = url_for('static', filename = 'profile_pics/' + current_user.image_file)
-    return render_template('account.html', title='Account', image_file = image_file)
+    form = UpdateAccountForm()
+    image_file = url_for(
+        'static', filename='profile_pics/' + current_user.image_file)
+    return render_template('account.html', title='Account', 
+                           image_file=image_file, form=form)
