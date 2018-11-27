@@ -3,7 +3,7 @@ from blog.models import User, Post
 from PIL import Image
 import secrets
 import os
-from blog.forms import RegistrationForm, LoginForm, UpdateAccountForm
+from blog.forms import RegistrationForm, LoginForm, PostForm, UpdateAccountForm
 from blog import app, db, bcrypt
 from flask_login import login_user, logout_user, current_user, login_required
 
@@ -107,3 +107,11 @@ def account():
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
     return render_template('account.html', title='Account', 
                            image_file=image_file, form=form)
+
+
+
+@app.route("/post/new", methods=['GET', 'POST'])
+@login_required
+def new_post():
+    form = PostForm()
+    return render_template('create_post.html', title='New Post', form=form)
