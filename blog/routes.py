@@ -3,7 +3,7 @@ from blog.models import User, Post
 from PIL import Image
 import secrets
 import os
-from blog.forms import RegistrationForm, LoginForm, PostForm, UpdateAccountForm
+from blog.forms import RegistrationForm, LoginForm, PostForm,RequestResetForm,ResetPasswordForm, UpdateAccountForm
 from blog import app, db, bcrypt
 from flask_login import login_user, logout_user, current_user, login_required
 
@@ -158,3 +158,23 @@ def user_posts(username):
         .order_by(Post.date_posted.desc())\
         .paginate(page=page, per_page=4)
     return render_template('user_posts.html', posts=posts, user=user)
+
+
+@app.route("/reset_password", methods=['GET', 'POST'])
+def reset_request():
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+    form = RequestResetForm()
+    return render_template('reset_request.html', title='Reset Password', form=form)
+
+
+@app.route("/reset_password/<token>", methods=['GET', 'POST'])
+def reset_token(token):
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+    user = User.verify_reset_token(token)
+    if user is None:
+        flash('That is an invalid or expired token','warning')
+        return redirect(url_for('reset_request'))
+    form = ResetPasswordForm()
+    return render_template('reset_token.html', title='Reset Password', form=form)
